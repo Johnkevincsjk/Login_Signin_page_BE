@@ -51,7 +51,7 @@ export const SignIN_controller = async (req, res, next) => {
 
 
     } catch (error) {
-        res.status(200).json({
+        return res.status(200).json({
             Feedback: "Something went wrong",
             error
         })
