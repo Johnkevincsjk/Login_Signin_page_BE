@@ -67,7 +67,7 @@ export const password_reset_mail = async (req, res, next) => {
             const mail_sent = await resetMail(email, randamString_m)
             return res.status(200).json({
                 Feedback: "Reset Pasword sent to your mail id",
-                data: mail_sent
+                randamString_m
             })
         } else {
             return res.status(404).json({
@@ -75,9 +75,51 @@ export const password_reset_mail = async (req, res, next) => {
             })
         }
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             Feedback: "Password reset mail not sent",
             error
         })
     }
 }
+
+// this controller is the update the password
+
+export const update_pass = async (req, res, next) => {
+    try {
+        const { password } = req.body;
+
+        const get_user = await user_model.findOne({ resetToken: req.params.randamString_m });
+
+
+        if (!get_user) {
+
+            return res.status(404).json({
+                Feedback: "Invalid reset token or user not found."
+            });
+        }
+
+        const hash_new_password = bcryptjs.hashSync(password, 10);
+
+        console.log("Hashed Password:", hash_new_password);
+
+        get_user.password = hash_new_password;
+        get_user.resetToken = '';
+        await get_user.save();
+
+
+        return res.status(200).json({
+            Feedback: "New password has been updated successfully.",
+            data: get_user
+        });
+
+
+
+
+    } catch (error) {
+
+        return res.status(500).json({
+            Feedback: "Something went wrong: Password updation failed.",
+            error
+        });
+    }
+};
